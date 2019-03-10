@@ -1,2 +1,3 @@
 ﻿  Ray Tracer.cpp
-  Ray Tracer.vcxproj -> C:\Users\LAB208\Documents\ZGK2019\Debug\Ray Tracer.exe
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(142): warning C4018: '<': signed/unsigned mismatch
+  Ray Tracer.vcxproj -> D:\Moje dokumenty\Studia\Informatyka\Sem6\Zaawansowana Grafika Komputerowa\ZGK-RayTracer\Debug\Ray Tracer.exe
