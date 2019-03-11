@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 	CScene scene;
 
 	ifstream file;
-	string filename = "../scene_simple.txt";
+	string filename = "../scene_final.txt";
 	file.open(filename.c_str(), ios::in); 
 	if (file.fail())
 		return 1;
@@ -43,6 +43,7 @@ int main(int argc, char** argv)
 		}
 		if (type.compare("cam_FOV") == 0) {
 			iss >> scene.cam.FOV;
+			scene.cam.FOV = scene.cam.FOV*3.141592f / 180;
 		}
 		if (type.compare("cam_eyep") == 0) {
 			iss >> scene.cam.position.x;
@@ -78,6 +79,46 @@ int main(int argc, char** argv)
 			iss >> sphere->shininess;
 			scene.mObjects.push_back(sphere);
 		}
+		if (type.compare("triangle") == 0) {
+			CTriangle *triangle = new CTriangle;
+			iss >> triangle->p0.x;
+			iss >> triangle->p0.y;
+			iss >> triangle->p0.z;
+			iss >> triangle->p1.x;
+			iss >> triangle->p1.y;
+			iss >> triangle->p1.z;
+			iss >> triangle->p2.x;
+			iss >> triangle->p2.y;
+			iss >> triangle->p2.z;
+			iss >> triangle->reflect;
+			iss >> triangle->amb.x;
+			iss >> triangle->amb.y;
+			iss >> triangle->amb.z;
+			iss >> triangle->diff.x;
+			iss >> triangle->diff.y;
+			iss >> triangle->diff.z;
+			iss >> triangle->spec.x;
+			iss >> triangle->spec.y;
+			iss >> triangle->spec.z;
+			iss >> triangle->shininess;
+			scene.mObjects.push_back(triangle);
+		}
+		if (type.compare("light") == 0) {
+			CLight *light = new CLight;
+			iss >> light->pos.x;
+			iss >> light->pos.y;
+			iss >> light->pos.z;
+			iss >> light->amb.x;
+			iss >> light->amb.y;
+			iss >> light->amb.z;
+			iss >> light->diff.x;
+			iss >> light->diff.y;
+			iss >> light->diff.z;
+			iss >> light->spec.x;
+			iss >> light->spec.y;
+			iss >> light->spec.z;
+			scene.mLights.push_back(light);
+		}
 	}
 	//scene.cam.mWidth = 1000;
 	//scene.cam.mHeight = 1000;
@@ -94,7 +135,6 @@ int main(int argc, char** argv)
 
 // G³ówna pêtla ray tracer'a
 int run( CScene* scene, CBitmap& img ) {
-		
 	for( int y = 0; y < scene->cam.mHeight; y++ ) {
 		for( int x = 0; x < scene->cam.mWidth; x++ ) {
 			
@@ -116,13 +156,12 @@ int run( CScene* scene, CBitmap& img ) {
 			primary_ray.pos = scene->cam.position;
 			
 			vec3 direction;
-			direction = scene->cam.target - scene->cam.position;
-			vec3 u = cross(scene->cam.up, direction);
-			vec3 v = cross(u, direction);
+			direction = normalize(scene->cam.target - scene->cam.position);
+			vec3 u = normalize(cross(scene->cam.up, direction));
+			vec3 v = normalize(cross(u, direction));
 			vec3 o = direction * (scene->cam.mWidth / (2 * tanf(scene->cam.FOV*0.5f))) - scene->cam.mWidth * 0.5f * u - scene->cam.mHeight *0.5f * v;
 
 			mat3 dir_matrix(u.x, u.y, u.z, v.x, v.y, v.z, o.x, o.y, o.z);
-			//mat3 dir_matrix(u.x, v.x, o.x, u.y, v.y, o.y, u.z, v.z, o.z);
 			vec3 dir_vec(x, y, 1.0f);
 
 			primary_ray.dir = dir_matrix * dir_vec;
@@ -132,18 +171,18 @@ int run( CScene* scene, CBitmap& img ) {
 			img.setPixel(x, y, vec3(res.color[0],res.color[1],res.color[2]));
         }
 	}
-			
 	return 0;
 }
 
 // Sledzenie pojedynczego promienia
 int rayTrace( CRay &ray, CScene* scene, Output* res ) 
 {
+	float t = FLT_MAX;
 	for (int i = 0; i < scene->mObjects.size(); i++)
 	{
-		//musisz porównywaæ wartoœci t wszystkich obiektów
-		if (scene->mObjects[i]->intersect(&ray) != -1)
+		if (scene->mObjects[i]->intersect(&ray) != -1 && scene->mObjects[i]->intersect(&ray)<t)
 		{
+			t = scene->mObjects[i]->intersect(&ray);
 			res->color[0] = scene->mObjects[i]->diff.x;
 			res->color[1] = scene->mObjects[i]->diff.y;
 			res->color[2] = scene->mObjects[i]->diff.z;

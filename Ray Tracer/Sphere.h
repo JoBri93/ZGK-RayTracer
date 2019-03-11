@@ -9,7 +9,7 @@ public:
 	CSphere(void);
 	~CSphere(void);
 
-	int radius;
+	float radius;
 	glm::vec3 center;
 
 	float intersect(CRay* ray);
