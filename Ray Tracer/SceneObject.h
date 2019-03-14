@@ -1,4 +1,8 @@
 #pragma once
+
+#include <glm\glm.hpp>
+#include "FreeImage.h"
+
 class CSceneObject
 {
 public:
@@ -12,5 +16,6 @@ public:
 	glm::vec3 spec;
 
 	virtual float intersect( CRay* ray ) = 0;
+	virtual glm::vec3 objectNorm(CRay* ray) = 0;
 };
 

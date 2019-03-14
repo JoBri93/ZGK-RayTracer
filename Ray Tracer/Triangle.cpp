@@ -44,3 +44,9 @@ float CTriangle::intersect(CRay* ray)
 	else
 		return -1;
 }
+
+glm::vec3 CTriangle::objectNorm(CRay* ray)
+{
+	glm::vec3 norm = normalize(cross(p0 - p1, p2 - p1));
+	return norm;
+}

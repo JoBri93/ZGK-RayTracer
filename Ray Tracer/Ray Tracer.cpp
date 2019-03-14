@@ -5,9 +5,6 @@
 #include <glm\glm.hpp>
 #include "FreeImage.h"
 
-#include <fstream>
-#include <sstream>
-
 struct Output {
 	float energy;
 	int tree;
@@ -22,106 +19,8 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-	//wczytywanie sceny
 	CScene scene;
-
-	ifstream file;
-	string filename = "../scene_final.txt";
-	file.open(filename.c_str(), ios::in); 
-	if (file.fail())
-		return 1;
-	string line;
-	while (getline(file, line)) {
-		istringstream iss(line);
-		string type;
-		iss >> type;
-		if (type.compare("cam_width") == 0) {
-			iss >> scene.cam.mWidth;
-		}
-		if (type.compare("cam_height") == 0) {
-			iss >> scene.cam.mHeight;
-		}
-		if (type.compare("cam_FOV") == 0) {
-			iss >> scene.cam.FOV;
-			scene.cam.FOV = scene.cam.FOV*3.141592f / 180;
-		}
-		if (type.compare("cam_eyep") == 0) {
-			iss >> scene.cam.position.x;
-			iss >> scene.cam.position.y;
-			iss >> scene.cam.position.z;
-		}
-		if (type.compare("cam_lookp") == 0) {
-			iss >> scene.cam.target.x;
-			iss >> scene.cam.target.y;
-			iss >> scene.cam.target.z;
-		}
-		if (type.compare("cam_up") == 0) {
-			iss >> scene.cam.up.x;
-			iss >> scene.cam.up.y;
-			iss >> scene.cam.up.z;
-		}
-		if (type.compare("sphere") == 0) {
-			CSphere *sphere = new CSphere;
-			iss >> sphere->radius;
-			iss >> sphere->center.x;
-			iss >> sphere->center.y;
-			iss >> sphere->center.z;
-			iss >> sphere->reflect;
-			iss >> sphere->amb.x;
-			iss >> sphere->amb.y;
-			iss >> sphere->amb.z;
-			iss >> sphere->diff.x;
-			iss >> sphere->diff.y;
-			iss >> sphere->diff.z;
-			iss >> sphere->spec.x;
-			iss >> sphere->spec.y;
-			iss >> sphere->spec.z;
-			iss >> sphere->shininess;
-			scene.mObjects.push_back(sphere);
-		}
-		if (type.compare("triangle") == 0) {
-			CTriangle *triangle = new CTriangle;
-			iss >> triangle->p0.x;
-			iss >> triangle->p0.y;
-			iss >> triangle->p0.z;
-			iss >> triangle->p1.x;
-			iss >> triangle->p1.y;
-			iss >> triangle->p1.z;
-			iss >> triangle->p2.x;
-			iss >> triangle->p2.y;
-			iss >> triangle->p2.z;
-			iss >> triangle->reflect;
-			iss >> triangle->amb.x;
-			iss >> triangle->amb.y;
-			iss >> triangle->amb.z;
-			iss >> triangle->diff.x;
-			iss >> triangle->diff.y;
-			iss >> triangle->diff.z;
-			iss >> triangle->spec.x;
-			iss >> triangle->spec.y;
-			iss >> triangle->spec.z;
-			iss >> triangle->shininess;
-			scene.mObjects.push_back(triangle);
-		}
-		if (type.compare("light") == 0) {
-			CLight *light = new CLight;
-			iss >> light->pos.x;
-			iss >> light->pos.y;
-			iss >> light->pos.z;
-			iss >> light->amb.x;
-			iss >> light->amb.y;
-			iss >> light->amb.z;
-			iss >> light->diff.x;
-			iss >> light->diff.y;
-			iss >> light->diff.z;
-			iss >> light->spec.x;
-			iss >> light->spec.y;
-			iss >> light->spec.z;
-			scene.mLights.push_back(light);
-		}
-	}
-	//scene.cam.mWidth = 1000;
-	//scene.cam.mHeight = 1000;
+	scene.parse("../scene_final.txt");
 
 	CBitmap img;
 	img.init(scene.cam.mWidth, scene.cam.mHeight);
@@ -133,18 +32,24 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+vec3 clamping(vec3 i)
+{
+	if (i.x > 1.0f) i.x = 1.0f;
+	if (i.y > 1.0f) i.y = 1.0f;
+	if (i.z > 1.0f) i.z = 1.0f;
+
+	if (i.x < 0.0f) i.x = 0.0f;
+	if (i.y < 0.0f) i.y = 0.0f;
+	if (i.z < 0.0f) i.z = 0.0f;
+
+	return i;
+}
+
 // G³ówna pêtla ray tracer'a
 int run( CScene* scene, CBitmap& img ) {
 	for( int y = 0; y < scene->cam.mHeight; y++ ) {
 		for( int x = 0; x < scene->cam.mWidth; x++ ) {
 			
-			//vec3 color;
-			//color.x = abs(cos(float(x) / scene->cam.mWidth * 20));
-			//color.y = abs(sin(float(y) / scene->cam.mHeight * 20));
-			//color.z = float(y) / scene->cam.mWidth;
-
-			//img.setPixel(x, y, color);
-
 			Output res;
 			res.energy = 1.0f;
 			res.color[0] = 0.0f;
@@ -168,25 +73,83 @@ int run( CScene* scene, CBitmap& img ) {
 
 			rayTrace(primary_ray, scene, &res);
 
-			img.setPixel(x, y, vec3(res.color[0],res.color[1],res.color[2]));
+			img.setPixel(x, scene->cam.mHeight-1-y, vec3(res.color[0], res.color[1], res.color[2]));
         }
 	}
 	return 0;
 }
 
-// Sledzenie pojedynczego promienia
-int rayTrace( CRay &ray, CScene* scene, Output* res ) 
+CSceneObject *findIntersection(CRay &ray, CScene* scene, bool closest_intersection)
 {
+	CSceneObject *intersection = NULL;
 	float t = FLT_MAX;
 	for (int i = 0; i < scene->mObjects.size(); i++)
 	{
-		if (scene->mObjects[i]->intersect(&ray) != -1 && scene->mObjects[i]->intersect(&ray)<t)
+		if (scene->mObjects[i]->intersect(&ray) != -1) //&& scene->mObjects[i]->intersect(&ray) < t)
 		{
-			t = scene->mObjects[i]->intersect(&ray);
-			res->color[0] = scene->mObjects[i]->diff.x;
-			res->color[1] = scene->mObjects[i]->diff.y;
-			res->color[2] = scene->mObjects[i]->diff.z;
+			if (closest_intersection == true)
+			{
+				if (scene->mObjects[i]->intersect(&ray) < t)
+				{
+					t = scene->mObjects[i]->intersect(&ray);
+					intersection = scene->mObjects[i];
+				}
+			}
+			else
+			{
+				intersection = scene->mObjects[i];
+				break;
+			}
+			//t = scene->mObjects[i]->intersect(&ray);
+			//intersection = scene->mObjects[i];
 		}
 	}
-	return 0;
+
+	return intersection;
+}
+
+// Sledzenie pojedynczego promienia
+int rayTrace(CRay &ray, CScene* scene, Output* res)
+{
+	CSceneObject *intersection = findIntersection(ray, scene, true);
+
+	if (intersection != NULL)
+	{
+		vec3 i_out;
+		i_out = intersection->amb*scene->mLights[0]->amb;
+		for (int j = 0; j < scene->mLights.size(); j++)
+		{
+			//promieñ oœwietlenia
+			CRay shadow_ray;
+			float t = intersection->intersect(&ray);
+			shadow_ray.pos = ray.pos + t * ray.dir;
+			shadow_ray.dir = normalize(scene->mLights[j]->pos - shadow_ray.pos);
+
+			CSceneObject *shadow = findIntersection(shadow_ray, scene, false);
+			if (shadow == NULL)
+			{
+				vec3 i_dif, i_spe, obj_norm, h;
+
+				h = normalize(shadow_ray.dir + normalize(-ray.dir));
+				obj_norm = intersection->objectNorm(&ray);
+
+				i_dif = intersection->diff * scene->mLights[j]->diff * dot(shadow_ray.dir, obj_norm);
+				i_spe = intersection->spec * scene->mLights[j]->spec * pow(dot(obj_norm, h), intersection->shininess);
+
+				i_dif = clamping(i_dif);
+				i_spe = clamping(i_spe);
+
+				i_out = i_out + i_dif + i_spe;
+
+			}
+
+			i_out = clamping(i_out);
+
+			res->color[0] = i_out.x;
+			res->color[1] = i_out.y;
+			res->color[2] = i_out.z;
+
+		}
+		return 0;
+	}
 }

@@ -29,3 +29,9 @@ float CSphere::intersect(CRay* ray)
 	}
 	return t;
 }
+
+glm::vec3 CSphere::objectNorm(CRay* ray)
+{
+	glm::vec3 norm = normalize(ray->pos+intersect(ray)*ray->dir - this->center);
+	return norm;
+}

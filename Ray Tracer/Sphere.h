@@ -13,5 +13,6 @@ public:
 	glm::vec3 center;
 
 	float intersect(CRay* ray);
+	glm::vec3 objectNorm(CRay* ray);
 };
 

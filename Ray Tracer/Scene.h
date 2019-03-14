@@ -1,4 +1,10 @@
 #pragma once
+
+#include <fstream>
+#include <sstream>
+
+using namespace std;
+
 class CScene
 {
 public:
