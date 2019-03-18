@@ -1,5 +1,21 @@
-﻿  Ray Tracer.cpp
+﻿  stdafx.cpp
+  Bitmap.cpp
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\bitmap.cpp(31): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\bitmap.cpp(32): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\bitmap.cpp(34): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\bitmap.cpp(35): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\bitmap.cpp(37): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\bitmap.cpp(38): warning C4244: '=': conversion from 'double' to 'BYTE', possible loss of data
+  Camera.cpp
+  Light.cpp
+  Ray Tracer.cpp
 d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(86): warning C4018: '<': signed/unsigned mismatch
-d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(120): warning C4018: '<': signed/unsigned mismatch
-d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(155): warning C4715: 'rayTrace': not all control paths return a value
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(118): warning C4018: '<': signed/unsigned mismatch
+  Ray.cpp
+  Scene.cpp
+  SceneObject.cpp
+  Sphere.cpp
+  Triangle.cpp
+  Generating Code...
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(152): warning C4715: 'rayTrace': not all control paths return a value
   Ray Tracer.vcxproj -> D:\Moje dokumenty\Studia\Informatyka\Sem6\Zaawansowana Grafika Komputerowa\ZGK-RayTracer\Debug\Ray Tracer.exe

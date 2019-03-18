@@ -85,7 +85,7 @@ CSceneObject *findIntersection(CRay &ray, CScene* scene, bool closest_intersecti
 	float t = FLT_MAX;
 	for (int i = 0; i < scene->mObjects.size(); i++)
 	{
-		if (scene->mObjects[i]->intersect(&ray) != -1) //&& scene->mObjects[i]->intersect(&ray) < t)
+		if (scene->mObjects[i]->intersect(&ray) > 0) //&& scene->mObjects[i]->intersect(&ray) < t)
 		{
 			if (closest_intersection == true)
 			{
@@ -93,6 +93,7 @@ CSceneObject *findIntersection(CRay &ray, CScene* scene, bool closest_intersecti
 				{
 					t = scene->mObjects[i]->intersect(&ray);
 					intersection = scene->mObjects[i];
+					continue;
 				}
 			}
 			else
@@ -100,8 +101,6 @@ CSceneObject *findIntersection(CRay &ray, CScene* scene, bool closest_intersecti
 				intersection = scene->mObjects[i];
 				break;
 			}
-			//t = scene->mObjects[i]->intersect(&ray);
-			//intersection = scene->mObjects[i];
 		}
 	}
 
@@ -112,14 +111,12 @@ CSceneObject *findIntersection(CRay &ray, CScene* scene, bool closest_intersecti
 int rayTrace(CRay &ray, CScene* scene, Output* res)
 {
 	CSceneObject *intersection = findIntersection(ray, scene, true);
-
 	if (intersection != NULL)
 	{
 		vec3 i_out;
 		i_out = intersection->amb*scene->mLights[0]->amb;
 		for (int j = 0; j < scene->mLights.size(); j++)
 		{
-			//promieñ oœwietlenia
 			CRay shadow_ray;
 			float t = intersection->intersect(&ray);
 			shadow_ray.pos = ray.pos + t * ray.dir;
@@ -133,11 +130,11 @@ int rayTrace(CRay &ray, CScene* scene, Output* res)
 				h = normalize(shadow_ray.dir + normalize(-ray.dir));
 				obj_norm = intersection->objectNorm(&ray);
 
-				i_dif = intersection->diff * scene->mLights[j]->diff * dot(shadow_ray.dir, obj_norm);
-				i_spe = intersection->spec * scene->mLights[j]->spec * pow(dot(obj_norm, h), intersection->shininess);
+				i_dif = intersection->diff * scene->mLights[j]->diff * abs(dot(shadow_ray.dir, obj_norm));
+				i_spe = intersection->spec * scene->mLights[j]->spec * pow(abs(dot(obj_norm, h)), intersection->shininess);
 
-				i_dif = clamping(i_dif);
-				i_spe = clamping(i_spe);
+				//i_dif = clamping(i_dif);
+				//i_spe = clamping(i_spe);
 
 				i_out = i_out + i_dif + i_spe;
 
