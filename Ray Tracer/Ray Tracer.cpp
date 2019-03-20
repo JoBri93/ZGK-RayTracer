@@ -73,7 +73,9 @@ int run( CScene* scene, CBitmap& img ) {
 
 			rayTrace(primary_ray, scene, &res);
 
-			img.setPixel(x, scene->cam.mHeight-1-y, vec3(res.color[0], res.color[1], res.color[2]));
+			vec3 color(res.color[0], res.color[1], res.color[2]);
+			color = clamping(color);
+			img.setPixel(x, scene->cam.mHeight-1-y, color);
         }
 	}
 	return 0;
@@ -85,7 +87,7 @@ CSceneObject *findIntersection(CRay &ray, CScene* scene, bool closest_intersecti
 	float t = FLT_MAX;
 	for (int i = 0; i < scene->mObjects.size(); i++)
 	{
-		if (scene->mObjects[i]->intersect(&ray) > 0) //&& scene->mObjects[i]->intersect(&ray) < t)
+		if (scene->mObjects[i]->intersect(&ray) > 0)
 		{
 			if (closest_intersection == true)
 			{
@@ -111,14 +113,15 @@ CSceneObject *findIntersection(CRay &ray, CScene* scene, bool closest_intersecti
 int rayTrace(CRay &ray, CScene* scene, Output* res)
 {
 	CSceneObject *intersection = findIntersection(ray, scene, true);
+
 	if (intersection != NULL)
 	{
+		float t = intersection->intersect(&ray);
 		vec3 i_out;
-		i_out = intersection->amb*scene->mLights[0]->amb;
+		i_out = intersection->amb*scene->mLights[0]->amb + intersection->amb*scene->mLights[1]->amb;
 		for (int j = 0; j < scene->mLights.size(); j++)
 		{
 			CRay shadow_ray;
-			float t = intersection->intersect(&ray);
 			shadow_ray.pos = ray.pos + t * ray.dir;
 			shadow_ray.dir = normalize(scene->mLights[j]->pos - shadow_ray.pos);
 
@@ -130,23 +133,33 @@ int rayTrace(CRay &ray, CScene* scene, Output* res)
 				h = normalize(shadow_ray.dir + normalize(-ray.dir));
 				obj_norm = intersection->objectNorm(&ray);
 
-				i_dif = intersection->diff * scene->mLights[j]->diff * abs(dot(shadow_ray.dir, obj_norm));
-				i_spe = intersection->spec * scene->mLights[j]->spec * pow(abs(dot(obj_norm, h)), intersection->shininess);
+				i_dif = intersection->diff * scene->mLights[j]->diff * dot(shadow_ray.dir, obj_norm);
+				i_spe = intersection->spec * scene->mLights[j]->spec * pow(dot(obj_norm, h), intersection->shininess);
 
-				//i_dif = clamping(i_dif);
-				//i_spe = clamping(i_spe);
+				i_dif = clamping(i_dif);
+				i_spe = clamping(i_spe);
 
-				i_out = i_out + i_dif + i_spe;
-
+				i_out = i_out + res->energy*i_dif + res->energy*i_spe;
 			}
 
 			i_out = clamping(i_out);
 
-			res->color[0] = i_out.x;
-			res->color[1] = i_out.y;
-			res->color[2] = i_out.z;
+			
 
 		}
+		res->color[0] += i_out.x;
+		res->color[1] += i_out.y;
+		res->color[2] += i_out.z;
+		
+		res->energy = res->energy-0.5f;
+		if (res->energy >= 0.1f && intersection->reflect>0.0f)
+		{
+			CRay secondary_ray;
+			secondary_ray.pos = ray.pos + t * ray.dir;
+			secondary_ray.dir = reflect(ray.dir, intersection->objectNorm(&ray));
+			rayTrace(secondary_ray, scene, res);
+		}
+
 		return 0;
 	}
 }

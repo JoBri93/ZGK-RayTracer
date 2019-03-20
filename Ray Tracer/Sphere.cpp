@@ -27,7 +27,10 @@ float CSphere::intersect(CRay* ray)
 		if (t1 < t2) t = t1;
 		else t = t2;
 	}
-	return t;
+	if (t == 0)
+		return 0.001;
+	else
+		return t;
 }
 
 glm::vec3 CSphere::objectNorm(CRay* ray)

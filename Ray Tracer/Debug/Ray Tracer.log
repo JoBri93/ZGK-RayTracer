@@ -9,13 +9,14 @@ d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-r
   Camera.cpp
   Light.cpp
   Ray Tracer.cpp
-d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(86): warning C4018: '<': signed/unsigned mismatch
-d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(118): warning C4018: '<': signed/unsigned mismatch
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(88): warning C4018: '<': signed/unsigned mismatch
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(122): warning C4018: '<': signed/unsigned mismatch
   Ray.cpp
   Scene.cpp
   SceneObject.cpp
   Sphere.cpp
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\sphere.cpp(31): warning C4305: 'return': truncation from 'double' to 'float'
   Triangle.cpp
   Generating Code...
-d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(152): warning C4715: 'rayTrace': not all control paths return a value
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(165): warning C4715: 'rayTrace': not all control paths return a value
   Ray Tracer.vcxproj -> D:\Moje dokumenty\Studia\Informatyka\Sem6\Zaawansowana Grafika Komputerowa\ZGK-RayTracer\Debug\Ray Tracer.exe
