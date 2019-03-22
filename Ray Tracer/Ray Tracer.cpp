@@ -20,7 +20,7 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	CScene scene;
-	scene.parse("../scene_final.txt");
+	scene.parse("../scene.txt");
 
 	CBitmap img;
 	img.init(scene.cam.mWidth, scene.cam.mHeight);
@@ -140,6 +140,25 @@ int rayTrace(CRay &ray, CScene* scene, Output* res)
 				i_spe = clamping(i_spe);
 
 				i_out = i_out + res->energy*i_dif + res->energy*i_spe;
+
+				if(intersection->absorption > 0.0f)
+				{
+					CRay refraction_ray;
+					vec3 vec_one(1.0f, 1.0f, 1.0f);
+					refraction_ray.pos = ray.pos + t * ray.dir;
+					refraction_ray.dir = (ray.dir -obj_norm*dot(ray.dir, obj_norm))/intersection->refraction - obj_norm*sqrt(vec_one-(vec_one- pow(dot(ray.dir, obj_norm),2))/pow(intersection->refraction,2));
+					refraction_ray.pos = refraction_ray.pos + 0.01f*refraction_ray.dir;
+					CSceneObject *refraction = findIntersection(refraction_ray, scene, true); //PROBLEM
+
+					/*if (refraction != NULL)
+					{
+						t = refraction->intersect(&refraction_ray);
+						CRay refracted_ray;
+						refracted_ray.pos = refraction_ray.pos + t * refraction_ray.dir + 0.01f * ray.dir;
+						refracted_ray.dir = ray.dir;*/
+						rayTrace(refraction_ray, scene, res);
+					//}
+				}
 			}
 
 			i_out = clamping(i_out);

@@ -64,6 +64,8 @@ bool CScene::parse(std::string fname)
 			iss >> sphere->spec.y;
 			iss >> sphere->spec.z;
 			iss >> sphere->shininess;
+			iss >> sphere->absorption;
+			iss >> sphere->refraction;
 			mObjects.push_back(sphere);
 		}
 		if (type.compare("triangle") == 0) {
@@ -88,6 +90,8 @@ bool CScene::parse(std::string fname)
 			iss >> triangle->spec.y;
 			iss >> triangle->spec.z;
 			iss >> triangle->shininess;
+			iss >> triangle->absorption;
+			iss >> triangle->refraction;
 			mObjects.push_back(triangle);
 		}
 		if (type.compare("light") == 0) {
