@@ -24,8 +24,20 @@ float CSphere::intersect(CRay* ray)
 		float t1, t2;
 		t1 = (-B - sqrtf(delta)) / (2 * A);
 		t2 = (-B + sqrtf(delta)) / (2 * A);
-		if (t1 < t2) t = t1;
-		else t = t2;
+
+		if (t1 > 0.0f && t2 > 0.0f)
+		{
+			if (t1 < t2) t = t1;
+			else t = t1;
+		}
+		else if (t1 < 0.0f && t2 > 0.0f)
+		{
+			t = t2;
+		}
+		else if (t1 > 0.0f && t2 < 0.0f)
+		{
+			t = t1;
+		}
 	}
 	if (t == 0)
 		return 0.001;

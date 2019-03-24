@@ -5,6 +5,9 @@
 #include <glm\glm.hpp>
 #include "FreeImage.h"
 
+using namespace glm;
+using namespace std;
+
 struct Output {
 	float energy;
 	int tree;
@@ -12,21 +15,19 @@ struct Output {
 };
 
 int run( CScene* scene, CBitmap& img );
-int rayTrace( CRay &ray, CScene* scene, Output* res );
-
-using namespace glm;
-using namespace std;
+int rayTrace( CRay &ray, CScene* scene, Output* res);
+vec3 primaryRayDir(CRay ray, CScene *scene, int x, int y);
 
 int main(int argc, char** argv)
 {
 	CScene scene;
 	scene.parse("../scene.txt");
-
+	
 	CBitmap img;
 	img.init(scene.cam.mWidth, scene.cam.mHeight);
 
 	run(&scene, img);
-
+	
 	img.save("../output.bmp");
 
 	return 0;
@@ -45,6 +46,21 @@ vec3 clamping(vec3 i)
 	return i;
 }
 
+vec3 primaryRayDir(CRay ray, CScene *scene, int x, int y)
+{
+	vec3 direction;
+
+	direction = normalize(scene->cam.target - scene->cam.position);
+	vec3 u = normalize(cross(scene->cam.up, direction));
+	vec3 v = normalize(cross(u, direction));
+	vec3 o = direction * (scene->cam.mWidth / (2 * tanf(scene->cam.FOV*0.5f))) - scene->cam.mWidth * 0.5f * u - scene->cam.mHeight *0.5f * v;
+
+	mat3 dir_matrix(u.x, u.y, u.z, v.x, v.y, v.z, o.x, o.y, o.z);
+	vec3 dir_vec(x, y, 1.0f);
+
+	return normalize(dir_matrix * dir_vec);
+}
+
 // G³ówna pêtla ray tracer'a
 int run( CScene* scene, CBitmap& img ) {
 	for( int y = 0; y < scene->cam.mHeight; y++ ) {
@@ -59,22 +75,12 @@ int run( CScene* scene, CBitmap& img ) {
 			//promieñ pierwotny
 			CRay primary_ray;
 			primary_ray.pos = scene->cam.position;
-			
-			vec3 direction;
-			direction = normalize(scene->cam.target - scene->cam.position);
-			vec3 u = normalize(cross(scene->cam.up, direction));
-			vec3 v = normalize(cross(u, direction));
-			vec3 o = direction * (scene->cam.mWidth / (2 * tanf(scene->cam.FOV*0.5f))) - scene->cam.mWidth * 0.5f * u - scene->cam.mHeight *0.5f * v;
-
-			mat3 dir_matrix(u.x, u.y, u.z, v.x, v.y, v.z, o.x, o.y, o.z);
-			vec3 dir_vec(x, y, 1.0f);
-
-			primary_ray.dir = dir_matrix * dir_vec;
-
+			primary_ray.dir = primaryRayDir(primary_ray, scene, x, y);
 			rayTrace(primary_ray, scene, &res);
 
 			vec3 color(res.color[0], res.color[1], res.color[2]);
 			color = clamping(color);
+
 			img.setPixel(x, scene->cam.mHeight-1-y, color);
         }
 	}
@@ -117,21 +123,24 @@ int rayTrace(CRay &ray, CScene* scene, Output* res)
 	if (intersection != NULL)
 	{
 		float t = intersection->intersect(&ray);
-		vec3 i_out;
+		vec3 i_out, obj_norm;
+
 		i_out = intersection->amb*scene->mLights[0]->amb + intersection->amb*scene->mLights[1]->amb;
+		obj_norm = intersection->objectNorm(&ray);
+
 		for (int j = 0; j < scene->mLights.size(); j++)
 		{
 			CRay shadow_ray;
 			shadow_ray.pos = ray.pos + t * ray.dir;
 			shadow_ray.dir = normalize(scene->mLights[j]->pos - shadow_ray.pos);
+			shadow_ray.pos = shadow_ray.pos + 0.001f * shadow_ray.dir;
 
 			CSceneObject *shadow = findIntersection(shadow_ray, scene, false);
 			if (shadow == NULL)
 			{
-				vec3 i_dif, i_spe, obj_norm, h;
+				vec3 i_dif, i_spe, h;
 
 				h = normalize(shadow_ray.dir + normalize(-ray.dir));
-				obj_norm = intersection->objectNorm(&ray);
 
 				i_dif = intersection->diff * scene->mLights[j]->diff * dot(shadow_ray.dir, obj_norm);
 				i_spe = intersection->spec * scene->mLights[j]->spec * pow(dot(obj_norm, h), intersection->shininess);
@@ -139,43 +148,43 @@ int rayTrace(CRay &ray, CScene* scene, Output* res)
 				i_dif = clamping(i_dif);
 				i_spe = clamping(i_spe);
 
-				i_out = i_out + res->energy*i_dif + res->energy*i_spe;
-
-				if(intersection->absorption > 0.0f)
-				{
-					CRay refraction_ray;
-					vec3 vec_one(1.0f, 1.0f, 1.0f);
-					refraction_ray.pos = ray.pos + t * ray.dir;
-					refraction_ray.dir = (ray.dir -obj_norm*dot(ray.dir, obj_norm))/intersection->refraction - obj_norm*sqrt(vec_one-(vec_one- pow(dot(ray.dir, obj_norm),2))/pow(intersection->refraction,2));
-					refraction_ray.pos = refraction_ray.pos + 0.01f*refraction_ray.dir;
-					CSceneObject *refraction = findIntersection(refraction_ray, scene, true); //PROBLEM
-
-					/*if (refraction != NULL)
-					{
-						t = refraction->intersect(&refraction_ray);
-						CRay refracted_ray;
-						refracted_ray.pos = refraction_ray.pos + t * refraction_ray.dir + 0.01f * ray.dir;
-						refracted_ray.dir = ray.dir;*/
-						rayTrace(refraction_ray, scene, res);
-					//}
-				}
+				i_out = i_out + res->energy * i_dif + res->energy * i_spe;
 			}
-
-			i_out = clamping(i_out);
-
-			
-
+			i_out = clamping(i_out);		
 		}
+
 		res->color[0] += i_out.x;
 		res->color[1] += i_out.y;
 		res->color[2] += i_out.z;
 		
-		res->energy = res->energy-0.5f;
+		res->energy = res->energy/2.0f;
+
+		if (intersection->absorption > 0.0f)
+		{
+			CRay refraction_ray;
+			refraction_ray.pos = ray.pos + t * ray.dir;
+			refraction_ray.dir = normalize((ray.dir - obj_norm * dot(ray.dir, obj_norm)) / intersection->refraction - obj_norm * sqrt(1 - (1 - pow(dot(ray.dir, obj_norm), 2)) / pow(intersection->refraction, 2)));
+			refraction_ray.pos = refraction_ray.pos + 0.001f * refraction_ray.dir;
+
+			t = intersection->intersect(&refraction_ray);
+
+			CRay refracted_ray;
+			refracted_ray.pos = refraction_ray.pos + t * refraction_ray.dir + 0.001f * ray.dir;
+			refracted_ray.dir = ray.dir;
+
+			res->color[0] = res->color[0] * exp(-intersection->absorption);
+			res->color[1] = res->color[1] * exp(-intersection->absorption);
+			res->color[2] = res->color[2] * exp(-intersection->absorption);
+
+			rayTrace(refracted_ray, scene, res);
+		}
+
 		if (res->energy >= 0.1f && intersection->reflect>0.0f)
 		{
 			CRay secondary_ray;
 			secondary_ray.pos = ray.pos + t * ray.dir;
 			secondary_ray.dir = reflect(ray.dir, intersection->objectNorm(&ray));
+			secondary_ray.pos = secondary_ray.pos + 0.001f * secondary_ray.dir;
 			rayTrace(secondary_ray, scene, res);
 		}
 

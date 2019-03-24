@@ -1,5 +1,5 @@
 ﻿  Ray Tracer.cpp
-d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(88): warning C4018: '<': signed/unsigned mismatch
-d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(122): warning C4018: '<': signed/unsigned mismatch
-d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(184): warning C4715: 'rayTrace': not all control paths return a value
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(94): warning C4018: '<': signed/unsigned mismatch
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(131): warning C4018: '<': signed/unsigned mismatch
+d:\moje dokumenty\studia\informatyka\sem6\zaawansowana grafika komputerowa\zgk-raytracer\ray tracer\ray tracer.cpp(193): warning C4715: 'rayTrace': not all control paths return a value
   Ray Tracer.vcxproj -> D:\Moje dokumenty\Studia\Informatyka\Sem6\Zaawansowana Grafika Komputerowa\ZGK-RayTracer\Debug\Ray Tracer.exe
