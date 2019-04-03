@@ -16,7 +16,7 @@ struct Output {
 
 int run( CScene* scene, CBitmap& img );
 int rayTrace( CRay &ray, CScene* scene, Output* res);
-vec3 primaryRayDir(CRay ray, CScene *scene, int x, int y);
+vec3 primaryRayDir(CRay ray, CScene *scene, float x, float y);
 
 int main(int argc, char** argv)
 {
@@ -46,7 +46,7 @@ vec3 clamping(vec3 i)
 	return i;
 }
 
-vec3 primaryRayDir(CRay ray, CScene *scene, int x, int y)
+vec3 primaryRayDir(CRay ray, CScene *scene, float x, float y)
 {
 	vec3 direction;
 
@@ -65,23 +65,35 @@ vec3 primaryRayDir(CRay ray, CScene *scene, int x, int y)
 int run( CScene* scene, CBitmap& img ) {
 	for( int y = 0; y < scene->cam.mHeight; y++ ) {
 		for( int x = 0; x < scene->cam.mWidth; x++ ) {
-			
-			Output res;
-			res.energy = 1.0f;
-			res.color[0] = 0.0f;
-			res.color[1] = 0.0f;
-			res.color[2] = 0.0f;
 
 			//promieñ pierwotny
 			CRay primary_ray;
 			primary_ray.pos = scene->cam.position;
-			primary_ray.dir = primaryRayDir(primary_ray, scene, x, y);
-			rayTrace(primary_ray, scene, &res);
 
-			vec3 color(res.color[0], res.color[1], res.color[2]);
-			color = clamping(color);
+			vec3 pixelColor = vec3(0);
+			for (int aaX=0; aaX<3; aaX++)
+			{
+				for (int aaY=0; aaY<3; aaY++)
+				{
+					Output res;
+					res.energy = 1.0f;
+					res.color[0] = 0.0f;
+					res.color[1] = 0.0f;
+					res.color[2] = 0.0f;
 
-			img.setPixel(x, scene->cam.mHeight-1-y, color);
+					primary_ray.dir = primaryRayDir(primary_ray, scene, x + aaX*0.5f, y + aaY*0.5f);
+					rayTrace(primary_ray, scene, &res);
+
+					pixelColor.x = pixelColor.x + res.color[0];
+					pixelColor.y = pixelColor.y + res.color[1];
+					pixelColor.z = pixelColor.z + res.color[2];
+				}
+			}
+
+			pixelColor = pixelColor / 9.0f;
+			pixelColor = clamping(pixelColor);
+
+			img.setPixel(x, scene->cam.mHeight-1-y, pixelColor);
         }
 	}
 	return 0;
@@ -171,10 +183,6 @@ int rayTrace(CRay &ray, CScene* scene, Output* res)
 			CRay refracted_ray;
 			refracted_ray.pos = refraction_ray.pos + t * refraction_ray.dir + 0.001f * ray.dir;
 			refracted_ray.dir = ray.dir;
-
-			res->color[0] = res->color[0] * exp(-intersection->absorption);
-			res->color[1] = res->color[1] * exp(-intersection->absorption);
-			res->color[2] = res->color[2] * exp(-intersection->absorption);
 
 			rayTrace(refracted_ray, scene, res);
 		}

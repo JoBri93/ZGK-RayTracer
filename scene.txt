@@ -10,24 +10,22 @@ cam_height 800
 cam_FOV 50
 
 % polozenie kamery
-cam_eyep 0 5 -20
-
-% punkt na ktory patrzy kamera
+cam_eyep 0 10 -15% punkt na ktory patrzy kamera
 cam_lookp 0 0 0
 
 % wektor wskazujacy polozenie gory obrazu
 cam_up 0 1 0 
 
 % sphere promien srodek_x srodek_y srodek_z reflect amb_r amb_g amb_b diff_r diff_b diff_b spec_r spec_g spec_b shininess absorption refraction
-sphere 2 0 -2 0  0  0.01 0.01 0.01   0.01 0.01 0.01   0.8 0.8 0.8 50 0.01 1.309
-sphere 1 0 -3 5  0  0.01 0.01 0.01   0.8 0.01 0.01   0.01 0.01 0.01 30 0 1
-sphere 1 2 -3 -2  0  0.01 0.01 0.01   0.01 0.8 0.01   0.01 0.01 0.01 30 0 1
-sphere 1.5 -2.5 -2 -3  0  0.01 0.01 0.01   0.1 0.01 0.1   0.01 0.01 0.01 30 0.5 1.1
+sphere 2 0 -1 0  0  0.01 0.01 0.01   0.01 0.01 0.01   0.8 0.8 0.8 50 1 1.309
+sphere 1 0 -3 4  0  0.01 0.01 0.01   0.8 0.01 0.01   0.01 0.01 0.01 30 0 1
+sphere 1 1.5 -0.5 -3  0  0.01 0.01 0.01   0.01 0.8 0.01   0.01 0.01 0.01 30 0 1
+
 
 % triangle p0x p0y p0z p1x p1y p1z p2x p2y p2z reflect amb_r amb_g amb_b diff_r diff_b diff_b spec_r spec_g spec_b shininess absorption refration
-triangle -5 -4 -5  -5 -4 5   5 -4 5  1  0.01 0.01 0.01   0.01 0.01 0.6   0.01 0.01 0.01 20 0 1
+triangle -20 -4 -10 -20 -4 10   20 -4 10  1  0.01 0.01 0.01   0.01 0.01 0.6   0.01 0.01 0.01 20 0 1
 
-triangle  5 -4 5  5 -4 -5  -5 -4 -5  1  0.01 0.01 0.01   0.01 0.01 0.6   0.01 0.01 0.01 20 0 1
+triangle  20 -4 10  20 -4 -10 -20 -4 -10  1  0.01 0.01 0.01   0.01 0.01 0.6   0.01 0.01 0.01 20 0 1
 
 % light pos_x pos_y pos_z amb_r amb_g amb_b diff_r diff_b diff_b spec_r spec_g spec_b
 light -4 4 -2    1 1 1   1 1 1  1 1 1
