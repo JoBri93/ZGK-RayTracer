@@ -1,2 +1,2 @@
 # ZGK-RayTracer
-Zaawansowana Grafika Komputerowa - algorytm ray tracingu
+Ray tracer algorithm
